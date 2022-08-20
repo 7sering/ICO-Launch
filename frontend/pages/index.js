@@ -13,7 +13,7 @@ import {
 
 export default function Home() {
   const zero = BigNumber.from(0);
-  const [walletConnected, setWalletConnected] = useState(false);
+  const [walletConnected, setwalletConnected] = useState(false);
   const [tokensMinted, setTokensMinted] = useState(zero);
   const [tokenAmount, setTokenAmount] = useState(zero);
   const [loading, setLoading] = useState(false);
@@ -48,13 +48,13 @@ export default function Home() {
       await getProviderOrSigner();
       setwalletConnected(true);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
   const getBalanceOfCryptoDevTokens = async () => {
     try {
-      const provider = await etProviderOrSigner();
+      const provider = await getProviderOrSigner();
       const tokenContract = new Contract(
         TOKEN_CONTRACT_ADDRESS,
         TOKEN_CONTRACT_ABI,
@@ -63,9 +63,10 @@ export default function Home() {
       const signer = await getProviderOrSigner(true);
       const address = await signer.getAddress(); // getting address
       const balance = await tokenContract.balanceOf(address);
-      setBalanceOfCryptoDevTokens(balance);
+      setBalanceOfCryptoDevTokens(balance)
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      setBalanceOfCryptoDevTokens(zero);
     }
   };
 
@@ -83,7 +84,7 @@ export default function Home() {
       const _tokensMinted = await tokenContract.totalSupply();
       setTokensMinted(_tokensMinted);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -93,6 +94,12 @@ export default function Home() {
       const nftContract = new Contract(
         NFT_CONTRACT_ADDRESS,
         NFT_CONTRACT_ABI,
+        provider
+      );
+
+      const tokenContract = new Contract(
+        TOKEN_CONTRACT_ADDRESS,
+        TOKEN_CONTRACT_ABI,
         provider
       );
 
@@ -114,7 +121,7 @@ export default function Home() {
         setTokensToBeClaimed(BigNumber.from(amount));
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       setTokensToBeClaimed(zero);
     }
   };
@@ -125,7 +132,7 @@ export default function Home() {
       const tokenContract = new Contract(
         TOKEN_CONTRACT_ADDRESS,
         TOKEN_CONTRACT_ABI,
-        Signer
+        signer,
       );
 
       const value = 0.001 * amount;
@@ -140,7 +147,7 @@ export default function Home() {
       await getTotalTokensMinted();
       await getTokensToBeClaimed();
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -159,7 +166,7 @@ export default function Home() {
       await getTotalTokensMinted();
       await getTokensToBeClaimed();
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
   const renderButton = () => {
@@ -178,7 +185,7 @@ export default function Home() {
           <div className={styles.description}>
            {tokensToBeClaimed * 10} Token Can be claimed
           </div>
-          <button className={style.button} onCLICK={claimCryptoDevTokens}>
+          <button className={styles.button} onClick={claimCryptoDevTokens}>
             Claim Tokens
           </button>
         </div>
@@ -212,44 +219,52 @@ export default function Home() {
         disableInjectedProvider: false,
       });
       connectWallet();
-      await getBalanceOfCryptoDevTokens();
-      await getTotalTokensMinted();
-      await getTokensToBeClaimed();
+      getBalanceOfCryptoDevTokens();
+      getTotalTokensMinted();
+      getTokensToBeClaimed();
     }
   }, [walletConnected]);
 
   return (
     <div>
+    <Head>
+      <title>Crypto Devs</title>
+      <meta name="description" content="ICO-Dapp" />
+      <link rel="icon" href="/favicon.ico" />
+    </Head>
+    <div className={styles.main}>
       <div>
-        <Head>
-          <title>Crypto Devs</title>
-          <meta name="description" content="ICO-Dapp" />
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-        <div className={styles.main}>
-          <h1 className={styles.title}>Welcome to Crypto Devs ICO!</h1>
-          <div className={styles.description}>
-            You can claim or mint Crypto Dev tokens here
-          </div>
-
-          {walletConnected ? (
-            <div>
-              <div className={styles.description}>
-                You have minted {utils.formatEther(balanceOfCryptoDevTokens)}
-              </div>
-
-              <div className={styles.description}>
-                Sor Far {utils.formatEther(tokensMinted)}/1000 Minted
-              </div>
-              {renderButton()}
-            </div>
-          ) : (
-            <button onClick={connectWallet} className={styles.button}>
-              Connect Wallet
-            </button>
-          )}
+        <h1 className={styles.title}>Welcome to Crypto Devs ICO!</h1>
+        <div className={styles.description}>
+          You can claim or mint Crypto Dev tokens here
         </div>
+        {walletConnected ? (
+          <div>
+            <div className={styles.description}>
+              {/* Format Ether helps us in converting a BigNumber to string */}
+              You have minted {utils.formatEther(balanceOfCryptoDevTokens)} Crypto
+              Dev Tokens
+            </div>
+            <div className={styles.description}>
+              {/* Format Ether helps us in converting a BigNumber to string */}
+              Overall {utils.formatEther(tokensMinted)}/10000 have been minted!!!
+            </div>
+            {renderButton()}
+          </div>
+        ) : (
+          <button onClick={connectWallet} className={styles.button}>
+            Connect your wallet
+          </button>
+        )}
+      </div>
+      <div>
+        {/* <img className={styles.image} src="./78uY3Mm.png" /> */}
       </div>
     </div>
+
+    <footer className={styles.footer}>
+      Made with &#10084; by Crypto Devs
+    </footer>
+  </div>
   );
 }
