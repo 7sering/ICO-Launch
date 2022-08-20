@@ -144,6 +144,24 @@ export default function Home() {
     }
   };
 
+  // Claim Crypto Dev Tokens
+  const claimCryptoDevTokens = async () => {
+    try {
+      const signer = await getProviderOrSigner(true);
+      const tokenContract = new Contract(TOKEN_CONTRACT_ADDRESS,TOKEN_CONTRACT_ABI, signer)
+
+      const txn = await tokenContract.claim()
+      setLoading(true)
+      await txn.wait()
+      setLoading(false)
+      window.alert("You Successfully Claimed Cypto Devs Token")
+      await getBalanceOfCryptoDevTokens();
+      await getTotalTokensMinted();
+      await getTokensToBeClaimed();
+    } catch (error) {
+      console.log(error);
+    }
+  }
   const renderButton = () => {
     if (loading) {
       return (
@@ -154,6 +172,17 @@ export default function Home() {
     }
 
     if (tokensToBeClaimed) {
+
+      return(
+        <div>
+          <div className={styles.description}>
+           {tokensToBeClaimed * 10} Token Can be claimed
+          </div>
+          <button className={style.button} onCLICK={claimCryptoDevTokens}>
+            Claim Tokens
+          </button>
+        </div>
+      )
     }
 
     return (
@@ -183,6 +212,9 @@ export default function Home() {
         disableInjectedProvider: false,
       });
       connectWallet();
+      await getBalanceOfCryptoDevTokens();
+      await getTotalTokensMinted();
+      await getTokensToBeClaimed();
     }
   }, [walletConnected]);
 
