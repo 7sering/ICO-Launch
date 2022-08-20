@@ -87,6 +87,20 @@ export default function Home() {
       console.log(error);
     }
   };
+
+const getTotalTokensMinted = async () => {
+  try {
+    const provider = await getProviderOrSigner();
+    const tokenContract = new Contract(TOKEN_CONTRACT_ADDRESS, TOKEN_CONTRACT_ABI, provider);
+
+    const _tokensMinted = await tokenContract.totalSupply();
+    setTokensMinted(_tokensMinted);
+
+  } catch (error) {
+    console.log(error);
+  }
+}
+
   const renderButton = () => {
     return (
       <div style={{ display: "flex-col" }}>
